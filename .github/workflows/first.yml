@@ -1,0 +1,18 @@
+name: first
+on:
+  pull_request:
+  push:
+    branches: [main]
+jobs: 
+  gitleaks:
+    runs-on: ubuntu-latest
+    steps: 
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: docker run -v ${{ github.workspace }}:/repo zricethezav/gitleaks:latest detect --source /repo -v
+  sca:
+    runs-on: ubuntu-latest
+    steps: 
+      - uses: actions/checkout@v4   
+      - run: docker run -v ${{ github.workspace }}:/repo aquasec/trivy:latest fs --scanners vuln --exit-code 1 --severity HIGH,CRITICAL /repo
