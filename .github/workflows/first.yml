@@ -10,9 +10,17 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - run: docker run -v ${{ github.workspace }}:/repo zricethezav/gitleaks:latest detect --source /repo -v
+      - run: docker run -v ${{ github.workspace }}:/repo zricethezav/gitleaks:latest detect --source /repo -f sarif -r /repo/gitleaks.sarif
+      - uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with: 
+          sarif_file: gitleaks.sarif  
   sca:
     runs-on: ubuntu-latest
     steps: 
       - uses: actions/checkout@v4   
-      - run: docker run -v ${{ github.workspace }}:/repo aquasec/trivy:latest fs --scanners vuln --exit-code 1 --severity HIGH,CRITICAL /repo
+      - run: docker run -v ${{ github.workspace }}:/repo aquasec/trivy:latest fs --scanners vuln --severity HIGH,CRITICAL --format sarif -o /repo/trivy.sarif /repo
+      - uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with: 
+          sarif_file: trivy.sarif  
